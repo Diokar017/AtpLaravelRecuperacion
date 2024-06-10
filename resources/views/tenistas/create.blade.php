@@ -1,8 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Crear Tenista')
-
-@section('content')
+@include('header')
     <div class="container mt-5">
         <h1 class="mb-4">Añadir Nuevo Tenista</h1>
         <form action="{{ route('tenistas.store') }}" method="POST" enctype="multipart/form-data">
@@ -91,7 +89,8 @@
             <button type="submit" class="btn btn-primary">Crear Tenista</button>
         </form>
     </div>
-@endsection
+
+@include('footer')
 
 @section('styles')
     <style>
@@ -122,3 +121,4 @@
         }
     </style>
 @endsection
+@sectiom

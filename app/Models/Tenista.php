@@ -9,7 +9,7 @@ class Tenista extends Model
 {
     use HasFactory;
 
-    public static mixed $IMAGE_DEFAULT;
+    public static string $IMAGE_DEFAULT = 'https://via.placeholder.com/150';
     protected $table = 'tenistas';
 
     protected $fillable = [
@@ -45,11 +45,11 @@ class Tenista extends Model
 
     ];
 
-    // Definir una relación si hay alguna
-    // public function torneos()
-    // {
-    //     return $this->belongsToMany(Torneo::class);
-    // }
+    public function torneos()
+    {
+        return $this->belongsToMany(Torneo::class, 'torneo_tenista');
+    }
+
 
     /**
      * Obtener la URL de la imagen del tenista. Si no hay imagen, devolver una imagen por defecto.

@@ -27,4 +27,8 @@ class Torneo extends Model
         'fechaInicio' => 'datetime',
         'fechaFinalizacion' => 'datetime',
     ];
+    public function tenistas()
+    {
+        return $this->belongsToMany(Tenista::class, 'torneo_tenista');
+    }
 }

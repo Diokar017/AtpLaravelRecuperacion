@@ -2,6 +2,27 @@
 @extends('layouts.app')
 
 @section('content')
+    @include('header')
+    <style>
+        .container {
+            color: black;
+        }
+        h1 {
+
+            margin-bottom: 20px;
+        }
+        h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        p {
+
+            margin-bottom: 10px;
+        }
+        img {
+            border-radius: 10px;
+        }
+    </style>
     <div class="container">
         <h1>Información del Tenista</h1>
         <div class="row">
@@ -21,7 +42,6 @@
                 <p><strong>Win Rate:</strong> {{ $tenista->winRate }}</p>
             </div>
             <div class="col-md-6">
-                <!-- Aquí puedes agregar la imagen del tenista -->
                 <img src="{{ asset('storage/' . $tenista->imagen) }}" alt="{{ $tenista->nombre }}" class="img-fluid">
             </div>
         </div>
@@ -31,5 +51,6 @@
             </div>
         </div>
     </div>
+    @include('footer')
 @endsection
 

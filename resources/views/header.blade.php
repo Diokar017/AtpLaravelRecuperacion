@@ -7,8 +7,22 @@
     <nav class="main-nav">
         <ul>
             <li><a href="{{ route('tenistas.index') }}">Tenistas</a></li>
-            <li><a href="{{ url('/torneos') }}">Torneos</a></li>
+            <li><a href="{{ route('torneos.index') }}">Torneos</a></li>
             <li><a href="{{ url('/estadisticas') }}">Estadísticas</a></li>
+            @guest
+                <li><a href="{{ route('login') }}">Iniciar Sesión</a></li>
+                <li><a href="{{ route('register') }}">Registrarse</a></li>
+            @else
+                <li>
+                    <a href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        Cerrar Sesión
+                    </a>
+                </li>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                    @csrf
+                </form>
+            @endguest
         </ul>
     </nav>
     <style>

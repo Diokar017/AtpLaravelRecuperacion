@@ -7,15 +7,18 @@ use App\Http\Resources\TenistaResource;
 use App\Models\Tenista;
 use App\Models\Torneo;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class TenistaController extends Controller
 {
 
-    public function index(Request $request)
+    public function index()
     {
-        $tenistas = Tenista::search($request->search)->orderBy('id', 'asc')->paginate(6);
-        return view('tenistas.index', ['tenistas' => TenistaResource::collection($tenistas)]);
+        
+        $tenistas = Tenista::orderBy('ranking')->paginate(10);
+
+        return view('tenistas.index', compact('tenistas'));
     }
 
     public function show(Tenista $tenista)
@@ -53,25 +56,25 @@ class TenistaController extends Controller
 
         if ($request->hasFile('imagen')) {
             if ($tenista->imagen) {
-
                 Storage::disk('public')->delete($tenista->imagen);
             }
             $data['imagen'] = $request->file('imagen')->store('imagenes', 'public');
         }
 
-
         $tenista->update($data);
         return redirect()->route('tenistas.index');
     }
-    public function updateImagen(Request $request, $id) {
 
+    public function updateImagen(Request $request, $id)
+    {
         $request->validate([
-            'imagen' =>'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imagen' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
+
         try {
             $tenista = Tenista::findOrFail($id);
 
-            if ($tenista->imagen != Tenista::$IMAGE_DEFAULT && Storage::exists($tenista->imagen)){
+            if ($tenista->imagen != 'default.jpg' && Storage::exists($tenista->imagen)) {
                 Storage::delete($tenista->imagen);
             }
 
@@ -89,15 +92,11 @@ class TenistaController extends Controller
 
     public function destroy(Tenista $tenista)
     {
-        if ($tenista->imagen) {
-            Storage::disk('public')->delete($tenista->imagen);
+        if (Gate::denies('manage-tenistas')) {
+            return redirect()->route('tenistas.index')->with('error', 'No tienes permiso para realizar esta acción.');
         }
 
         $tenista->delete();
-        return redirect()->route('tenistas.index');
+        return redirect()->route('tenistas.index')->with('success', 'Tenista eliminado exitosamente.');
     }
-
-
-
-
 }

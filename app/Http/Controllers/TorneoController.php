@@ -1,77 +1,79 @@
 <?php
-
-namespace App\Http\wwww;
+namespace App\Http\Controllers;
 
 use App\Http\Requests\TorneoRequest;
-use App\Http\Resources\TorneoResource;
+use App\Models\Tenista;
 use App\Models\Torneo;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Exception;
 
 class TorneoController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $torneos = Torneo::search($request->search)->orderBy('id', 'asc')->paginate(6);
-        return view('torneos.index', ['torneos' => TorneoResource::collection($torneos)]);
-    }
-
-    public function show(Torneo $torneo)
-    {
-        return view('torneos.show', ['torneo' => new TorneoResource($torneo)]);
+        $torneos = Torneo::all();
+        return view('torneos.index', compact('torneos'));
     }
 
     public function create()
     {
-        return view('torneos.create');
+        $tenistas = Tenista::all();
+        return view('torneos.create', compact('tenistas'));
     }
 
     public function store(TorneoRequest $request)
     {
-        $data = $request->validated();
+        try {
+            $torneo = new Torneo();
+            $torneo->ubicacion = $request->ubicacion;
+            $torneo->modo = $request->modo;
+            $torneo->categoria = $request->categoria;
+            $torneo->superficie = $request->superficie;
+            $torneo->entradas = $request->entradas;
+            $torneo->premio = $this->calculatePremio($request->categoria);
+            $torneo->fechaInicio = $request->fechaInicio;
+            $torneo->fechaFinalizacion = $request->fechaFinalizacion;
+            $torneo->save();
 
-        // Handle image upload
-        if ($request->hasFile('imagen')) {
-            $data['imagen'] = $request->file('imagen')->store('imagenes', 'public');
+            return redirect()->route('torneos.index')->with('success', 'Torneo creado correctamente.');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Error al crear el torneo: ' . $e->getMessage());
         }
-
-        $torneo = Torneo::create($data);
-        flash('Torneo creado con éxito.')->success()->important();
-        return redirect()->route('torneos.index');
     }
 
     public function edit(Torneo $torneo)
     {
-        return view('torneos.edit', ['torneo' => $torneo]);
+        return view('torneos.edit', compact('torneo'));
     }
 
     public function update(TorneoRequest $request, Torneo $torneo)
     {
-        $data = $request->validated();
+        $validatedData = $request->validated();
+        $premio = $this->calculatePremio($validatedData['modo']);
+        $validatedData['premio'] = $premio;
 
-        // Handle image upload
-        if ($request->hasFile('imagen')) {
-            if ($torneo->imagen) {
-                // Delete old image
-                Storage::disk('public')->delete($torneo->imagen);
-            }
-            $data['imagen'] = $request->file('imagen')->store('imagenes', 'public');
-        }
+        $torneo->update($validatedData);
 
-        $torneo->update($data);
-        flash('Torneo actualizado con éxito.')->success()->important();
-        return redirect()->route('torneos.index');
+        return redirect()->route('torneos.index')->with('success', 'Torneo actualizado correctamente.');
     }
 
     public function destroy(Torneo $torneo)
     {
-        if ($torneo->imagen) {
-            // Delete image
-            Storage::disk('public')->delete($torneo->imagen);
-        }
-
         $torneo->delete();
-        flash('Torneo eliminado con éxito.')->success()->important();
-        return redirect()->route('torneos.index');
+
+        return redirect()->route('torneos.index')->with('success', 'Torneo eliminado correctamente.');
+    }
+
+    private function calculatePremio($categoria)
+    {
+        switch ($categoria) {
+            case '500':
+                return 'Medio millón de euros';
+            case '1000':
+                return 'Un millón de euros';
+            case '1500':
+                return 'Un millón y medio de euros';
+            default:
+                return 'Premio no especificado';
+        }
     }
 }

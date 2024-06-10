@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -15,8 +14,8 @@ class TorneoRequest extends FormRequest
     {
         return [
             'ubicacion' => 'required|string|max:255',
-            'modo' => 'required|string|max:255',
-            'categoria' => 'required|string|max:255',
+            'modo' => 'required|in:solitario,pareja',
+            'categoria' => 'required|string|in:500,1000,1500', // Validación de enum
             'superficie' => 'required|string|max:255',
             'entradas' => 'required|integer',
             'premio' => 'required|numeric',
@@ -26,3 +25,4 @@ class TorneoRequest extends FormRequest
         ];
     }
 }
+
